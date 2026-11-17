@@ -11,16 +11,23 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class TimerState(
-    val totalSeconds: Int = 60,
-    val remainingSeconds: Int = 60,
+    val totalSeconds: Int = 0,
+    val remainingSeconds: Int = 0,
     val isRunning: Boolean = false,
     val isFinished: Boolean = false,
 ) {
+    // Parts of the chosen duration, used by the scroll wheels.
+    val hours: Int get() = totalSeconds / 3600
+    val minutes: Int get() = (totalSeconds % 3600) / 60
+    val seconds: Int get() = totalSeconds % 60
+
+    // Countdown shown on screen, e.g. 0:00:00 or 1:05:30.
     val display: String
         get() {
-            val m = remainingSeconds / 60
+            val h = remainingSeconds / 3600
+            val m = (remainingSeconds % 3600) / 60
             val s = remainingSeconds % 60
-            return "${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}"
+            return "$h:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}"
         }
 }
 
@@ -29,10 +36,11 @@ class TimerViewModel : ViewModel() {
     val state: StateFlow<TimerState> = _state.asStateFlow()
     private var job: Job? = null
 
-    fun addSeconds(delta: Int) {
+    fun setDuration(hours: Int, minutes: Int, seconds: Int) {
         if (_state.value.isRunning) return
-        val new = (_state.value.totalSeconds + delta).coerceIn(0, 99 * 60)
-        _state.value = TimerState(totalSeconds = new, remainingSeconds = new)
+        val total = hours * 3600 + minutes * 60 + seconds
+        if (total == _state.value.totalSeconds) return
+        _state.value = TimerState(totalSeconds = total, remainingSeconds = total)
     }
 
     fun start() {
@@ -52,8 +60,9 @@ class TimerViewModel : ViewModel() {
         _state.update { it.copy(isRunning = false) }
     }
 
+    // Stops the timer and clears everything back to 0:00:00.
     fun reset() {
         pause()
-        _state.update { it.copy(remainingSeconds = it.totalSeconds, isFinished = false) }
+        _state.value = TimerState()
     }
 }

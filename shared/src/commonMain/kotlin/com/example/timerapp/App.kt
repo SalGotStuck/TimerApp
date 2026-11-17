@@ -1,7 +1,13 @@
 package com.example.timerapp
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,29 +45,36 @@ fun App() {
         ) {
             Text(if (state.isFinished) "Time's up!" else state.display, fontSize = 64.sp)
             Spacer(Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { timer.addSeconds(-60) }) { Text("-1:00") }
-                OutlinedButton(onClick = { timer.addSeconds(60) }) { Text("+1:00") }
+
+            // Scroll wheels to choose hours, minutes and seconds (locked while running).
+            val canEdit = !state.isRunning
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                WheelPicker(state.hours, 0..23, "hours", canEdit) {
+                    timer.setDuration(it, state.minutes, state.seconds)
+                }
+                Text(":", fontSize = 28.sp)
+                WheelPicker(state.minutes, 0..59, "min", canEdit) {
+                    timer.setDuration(state.hours, it, state.seconds)
+                }
+                Text(":", fontSize = 28.sp)
+                WheelPicker(state.seconds, 0..59, "sec", canEdit) {
+                    timer.setDuration(state.hours, state.minutes, it)
+                }
             }
 
-
+            Spacer(Modifier.height(24.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { timer.addSeconds(-10) }) { Text("-0:10") }
-                OutlinedButton(onClick = { timer.addSeconds(10) }) {Text("+0:10") }
-            }
-
-
-
-
-
-            Spacer(Modifier.height(16.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { if (state.isRunning) timer.pause() else timer.start() }) {
+                Button(
+                    onClick = { if (state.isRunning) timer.pause() else timer.start() },
+                    enabled = state.isRunning || state.remainingSeconds > 0,
+                ) {
                     Text(if (state.isRunning) "Pause" else "Start")
                 }
                 OutlinedButton(onClick = { timer.reset() }) { Text("Reset") }
             }
         }
-
     }
 }
