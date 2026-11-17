@@ -40,9 +40,20 @@ fun App() {
             Text(if (state.isFinished) "Time's up!" else state.display, fontSize = 64.sp)
             Spacer(Modifier.height(24.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { timer.addSeconds(-60) }) { Text("-1 min") }
-                OutlinedButton(onClick = { timer.addSeconds(60) }) { Text("+1 min") }
+                OutlinedButton(onClick = { timer.addSeconds(-60) }) { Text("-1:00") }
+                OutlinedButton(onClick = { timer.addSeconds(60) }) { Text("+1:00") }
             }
+
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { timer.addSeconds(-10) }) { Text("-0:10") }
+                OutlinedButton(onClick = { timer.addSeconds(10) }) {Text("+0:10") }
+            }
+
+
+
+
+
             Spacer(Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { if (state.isRunning) timer.pause() else timer.start() }) {
@@ -51,5 +62,6 @@ fun App() {
                 OutlinedButton(onClick = { timer.reset() }) { Text("Reset") }
             }
         }
+
     }
 }
